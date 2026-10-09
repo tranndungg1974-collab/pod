@@ -28,6 +28,16 @@
   <section>
     <div class="bar"><span id="who"></span><a href="index.html">Xem website</a><button class="button" id="logout">Đăng xuất</button></div>
 
+    <!-- Cài đặt trang chuyển hướng sau checkout -->
+    <div class="card">
+      <h2>Trang chuyển hướng sau Checkout</h2>
+      <p style="margin-bottom:12px;color:#64748b;font-size:0.95rem">Khi khách bấm Thanh toán trên trang chủ, hệ thống sẽ lưu đơn hàng rồi chuyển đến URL này.</p>
+      <div class="form" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+        <input id="fRedirect" type="text" placeholder="success.html hoặc https://..." style="flex:1;min-width:200px;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px">
+        <button type="button" class="button" id="saveRedirect" style="width:auto;margin:0">Lưu URL</button>
+      </div>
+    </div>
+
     <div class="card">
       <h2 id="formTitle">Thêm sản phẩm</h2>
       <form id="pForm" class="form grid2">

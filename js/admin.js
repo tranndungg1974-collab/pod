@@ -1,4 +1,4 @@
-import { auth, db, ref, push, update, remove, onValue, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "./firebase.js";
+import { auth, db, ref, push, update, remove, onValue, set, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "./firebase.js";
 
 // Tự động đăng nhập. Đặt false khi đưa website lên mạng thật.
 const AUTO_LOGIN = true;
@@ -10,6 +10,7 @@ const fmt = n => Number(n || 0).toLocaleString('vi-VN') + 'đ';
 
 let products = {}, supplier = {}, editingId = null, started = false, autoTried = false;
 let uid = null;
+let settings = { redirectUrl: 'success.html' };
 
 function toast(m) {
   const t = $('toast');
@@ -27,7 +28,6 @@ function errText(e) {
       : 'Lỗi: ' + (e.code || e.message);
 }
 
-// Base path theo rules đơn giản: /users/$uid/...
 function userPath(sub) {
   return `users/${uid}/${sub}`;
 }
@@ -86,6 +86,11 @@ function start() {
   onValue(ref(db, userPath('orders')), s => {
     renderOrders(s.val() || {});
   }, fail);
+
+  onValue(ref(db, userPath('settings')), s => {
+    settings = s.val() || { redirectUrl: 'success.html' };
+    if ($('fRedirect')) $('fRedirect').value = settings.redirectUrl || 'success.html';
+  }, fail);
 }
 
 function renderProducts() {
@@ -126,6 +131,18 @@ function renderOrders(orders) {
     </td>
   </tr>`).join('') || '<tr><td colspan="5">Chưa có đơn hàng.</td></tr>';
 }
+
+// Lưu URL chuyển hướng sau checkout
+$('saveRedirect')?.addEventListener('click', async () => {
+  if (!uid) return;
+  const url = ($('fRedirect').value || 'success.html').trim();
+  try {
+    await set(ref(db, userPath('settings')), { redirectUrl: url });
+    toast('Đã lưu trang chuyển hướng checkout');
+  } catch (err) {
+    toast(errText(err));
+  }
+});
 
 $('pForm').addEventListener('submit', async e => {
   e.preventDefault();

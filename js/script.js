@@ -1,4 +1,8 @@
-import { db, ref, set, push } from "./firebase.js";
+import { auth, db, ref, onValue, set, push, signInWithEmailAndPassword, onAuthStateChanged } from "./firebase.js";
+
+// ===== Auto-login (cùng tài khoản admin) =====
+const AUTO_LOGIN = true;
+const ADMIN = { email: "dropship@hd.com", password: "123456" };
 
 // ===== Màu sắc =====
 const COLORS = {
@@ -8,16 +12,6 @@ const COLORS = {
   red:   '#ef4444',
   green: '#16a34a'
 };
-
-// Dữ liệu sản phẩm local (rules chỉ cho phép /users/$uid nên index dùng data mẫu)
-const PRODUCTS = [
-  { id: 1, name: 'Áo thun', type: 'shirt', price: 199000, rating: 5, sizes: ['S','M','L','XL'], desc: 'Sản phẩm POD phổ biến nhất. Vải cotton mềm, in sắc nét.' },
-  { id: 2, name: 'Hoodie', type: 'hoodie', price: 399000, rating: 4, sizes: ['M','L','XL'], desc: 'Nhu cầu cao vào mùa lạnh. Nỉ dày, in bền màu.' },
-  { id: 3, name: 'Cốc sứ', type: 'mug', price: 129000, rating: 4, sizes: ['330ml','450ml'], desc: 'Món quà tặng phổ biến, in được cả hai mặt.' },
-  { id: 4, name: 'Poster', type: 'poster', price: 89000, rating: 3, sizes: ['A4','A3','A2'], desc: 'Trang trí phòng, in trên giấy mỹ thuật.' },
-  { id: 5, name: 'Ốp điện thoại', type: 'case', price: 149000, rating: 4, sizes: ['iPhone 15','iPhone 16','Galaxy S24'], desc: 'Nhiều mẫu thiết kế, nhiều dòng máy.' },
-  { id: 6, name: 'Túi tote', type: 'tote', price: 119000, rating: 4, sizes: ['Một cỡ'], desc: 'Túi vải canvas thân thiện môi trường.' }
-];
 
 const CATEGORIES = [
   { key: 'all', label: 'Tất cả' },
@@ -57,10 +51,15 @@ function art(type, c) {
 }
 
 // ===== State =====
+let PRODUCTS = [];
 let state = { cat: 'all', q: '', sort: 'pop' };
 let current = null;
 let color = 'white';
 let cart = JSON.parse(localStorage.getItem('pod-cart') || '[]');
+let uid = null;
+let redirectUrl = 'success.html'; // mặc định, admin có thể đổi
+let autoTried = false;
+let dataReady = false;
 
 // ===== Render =====
 function renderFilters() {
@@ -70,6 +69,8 @@ function renderFilters() {
 }
 
 function renderProducts() {
+  if (!dataReady) return;
+
   let list = PRODUCTS.filter(p =>
     (state.cat === 'all' || p.type === state.cat) &&
     p.name.toLowerCase().includes(state.q.toLowerCase())
@@ -80,7 +81,7 @@ function renderProducts() {
   else list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
   $('productGrid').innerHTML = list.map(p => `
-    <button type="button" class="product" data-id="${p.id}">
+    <button type="button" class="product" data-id="${esc(p.id)}">
       <div class="thumb">${visual(p, COLORS.white)}</div>
       <div class="p-info">
         <h3>${esc(p.name)}</h3>
@@ -204,15 +205,34 @@ $('cartList').addEventListener('click', e => {
   }
 });
 
-// Checkout demo – không ghi Firebase (rules chỉ cho /users/$uid, index không đăng nhập)
-$('checkout').addEventListener('click', () => {
+// Checkout → lưu đơn + chuyển hướng đến trang do admin cấu hình
+$('checkout').addEventListener('click', async () => {
   if (!cart.length) return toast('Giỏ hàng đang trống');
+  if (!uid) return toast('Đang kết nối, vui lòng thử lại');
+
   const contact = prompt('Nhập tên và số điện thoại nhận hàng:');
   if (!contact) return;
-  cart = [];
-  saveCart();
-  $('drawer').hidden = true;
-  toast('Đặt hàng thành công! (demo)');
+
+  try {
+    await set(push(ref(db, `users/${uid}/orders`)), {
+      items: cart,
+      total: cart.reduce((s, i) => s + i.price, 0),
+      contact: contact.slice(0, 120),
+      createdAt: Date.now(),
+      status: 'pending'
+    });
+
+    cart = [];
+    saveCart();
+    $('drawer').hidden = true;
+
+    // Chuyển hướng đến trang do admin thiết lập
+    const url = redirectUrl || 'success.html';
+    window.location.href = url;
+  } catch (e) {
+    console.error(e);
+    toast('Không gửi được đơn, vui lòng thử lại.');
+  }
 });
 
 document.addEventListener('keydown', e => {
@@ -222,7 +242,62 @@ document.addEventListener('keydown', e => {
   }
 });
 
-// ===== Khởi tạo =====
+// ===== Auth + Load data =====
+function startData() {
+  if (!uid) return;
+
+  // Load products real-time
+  onValue(ref(db, `users/${uid}/products`), snap => {
+    if (snap.exists()) {
+      PRODUCTS = Object.entries(snap.val()).map(([id, p]) => ({
+        id,
+        rating: p.rating || 4,
+        sizes: p.sizes || ['Một cỡ'],
+        desc: p.desc || '',
+        ...p
+      }));
+    } else {
+      PRODUCTS = [];
+    }
+    dataReady = true;
+    renderProducts();
+  }, err => {
+    console.warn('Load products error:', err);
+    dataReady = true;
+    PRODUCTS = [];
+    renderProducts();
+  });
+
+  // Load settings (redirect URL sau checkout)
+  onValue(ref(db, `users/${uid}/settings`), snap => {
+    if (snap.exists() && snap.val().redirectUrl) {
+      redirectUrl = snap.val().redirectUrl;
+    }
+  });
+}
+
+onAuthStateChanged(auth, async user => {
+  if (user) {
+    uid = user.uid;
+    startData();
+    return;
+  }
+
+  // Auto login
+  if (AUTO_LOGIN && !autoTried) {
+    autoTried = true;
+    try {
+      await signInWithEmailAndPassword(auth, ADMIN.email, ADMIN.password);
+    } catch (e) {
+      console.error('Auto-login failed:', e);
+      if ($('loading')) {
+        $('loading').innerHTML = '<span style="color:#dc2626">Không thể đăng nhập. Kiểm tra tài khoản Firebase.</span>';
+      }
+    }
+  }
+});
+
+// ===== Khởi tạo UI =====
 renderFilters();
-renderProducts();
 renderCart();
+if ($('loading')) $('loading').hidden = false;
