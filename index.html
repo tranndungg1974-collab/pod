@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print on Demand (POD)</title>
+<meta name="description" content="Tìm hiểu mô hình kinh doanh Print on Demand và xem các sản phẩm POD phổ biến.">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header class="hero">
+  <h1>PRINT ON DEMAND (POD)</h1>
+  <p>Mô hình kinh doanh in theo yêu cầu hiện đại</p>
+</header>
+
+<nav class="nav">
+  <a href="#gioithieu">Giới thiệu</a>
+  <a href="#quytrinh">Quy trình</a>
+  <a href="#uudiem">Ưu điểm</a>
+  <a href="#sanpham">Sản phẩm</a>
+  <button type="button" class="cart-btn" id="cartBtn" aria-label="Mở giỏ hàng">
+    🛒 Giỏ hàng <span id="cartCount">0</span>
+  </button>
+</nav>
+
+<section id="gioithieu">
+  <div class="card">
+    <h2>POD là gì?</h2>
+    <p>Print on Demand (POD) là mô hình kinh doanh mà sản phẩm chỉ được in hoặc sản xuất sau khi khách hàng đặt mua. Nhờ đó người bán không cần nhập hàng số lượng lớn hay lưu kho.</p>
+  </div>
+</section>
+
+<section id="quytrinh">
+  <div class="card">
+    <h2>Quy trình hoạt động</h2>
+    <ul>
+      <li>Thiết kế sản phẩm.</li>
+      <li>Đăng bán trên website hoặc sàn thương mại điện tử.</li>
+      <li>Khách hàng đặt hàng.</li>
+      <li>Đơn vị POD in sản phẩm.</li>
+      <li>Đóng gói và giao đến khách.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="uudiem">
+  <div class="card">
+    <h2>Ưu điểm</h2>
+    <ul>
+      <li>Không cần nhập kho.</li>
+      <li>Chi phí ban đầu thấp.</li>
+      <li>Dễ mở rộng thị trường quốc tế.</li>
+      <li>Có thể bán nhiều loại sản phẩm.</li>
+      <li>Ít rủi ro tồn kho.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="sanpham">
+  <div class="card">
+    <h2>Các sản phẩm POD phổ biến</h2>
+
+    <div class="toolbar">
+      <div class="filters" id="filters" role="group" aria-label="Lọc sản phẩm"></div>
+      <input type="search" id="search" placeholder="Tìm sản phẩm..." aria-label="Tìm sản phẩm">
+      <select id="sort" aria-label="Sắp xếp">
+        <option value="pop">Phổ biến nhất</option>
+        <option value="asc">Giá tăng dần</option>
+        <option value="desc">Giá giảm dần</option>
+      </select>
+    </div>
+
+    <div id="loading" hidden>
+      <div class="spinner"></div>
+      <span>Đang tải sản phẩm...</span>
+    </div>
+
+    <div class="grid" id="productGrid"></div>
+    <p class="empty" id="empty" hidden>Không tìm thấy sản phẩm phù hợp. Hãy thử từ khóa khác.</p>
+  </div>
+</section>
+
+<!-- Modal chi tiết sản phẩm -->
+<div class="modal" id="modal" hidden>
+  <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <button type="button" class="close" id="closeModal" aria-label="Đóng">×</button>
+    <div class="modal-img" id="mImg"></div>
+    <div class="modal-info">
+      <h3 id="mTitle"></h3>
+      <div class="stars" id="mStars"></div>
+      <p id="mDesc"></p>
+      <p class="price" id="mPrice"></p>
+      <label>Màu sắc</label>
+      <div class="swatches" id="mColors"></div>
+      <label for="mSize">Kích cỡ</label>
+      <select id="mSize"></select>
+      <button type="button" class="button" id="addCart">Thêm vào giỏ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Giỏ hàng -->
+<aside class="drawer" id="drawer" hidden>
+  <div class="drawer-head">
+    <h3>Giỏ hàng</h3>
+    <button type="button" class="close" id="closeCart" aria-label="Đóng giỏ hàng">×</button>
+  </div>
+  <ul id="cartList"></ul>
+  <div class="drawer-foot">
+    <p>Tổng: <strong id="cartTotal">0đ</strong></p>
+    <button type="button" class="button" id="checkout">Thanh toán (demo)</button>
+  </div>
+</aside>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<footer>
+  <h3>Print on Demand (POD)</h3>
+  <p>Website minh họa bằng HTML, CSS &amp; JavaScript.</p>
+  <p>© 2026</p>
+</footer>
+
+<script type="module" src="js/script.js"></script>
+</body>
+</html>

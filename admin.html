@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản trị POD</title>
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/admin.css">
+</head>
+<body>
+<header class="hero small"><h1>Trang quản trị POD</h1><p>Thêm sản phẩm, theo dõi lợi nhuận và đơn hàng</p></header>
+
+<section id="loginBox">
+  <div class="card narrow">
+    <h2>Đăng nhập</h2>
+    <form id="loginForm" class="form">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Mật khẩu" required>
+      <button class="button" type="submit">Đăng nhập</button>
+    </form>
+    <p class="msg" id="loginMsg"></p>
+  </div>
+</section>
+
+<main id="adminBox" hidden>
+  <section>
+    <div class="bar"><span id="who"></span><a href="index.html">Xem website</a><button class="button" id="logout">Đăng xuất</button></div>
+
+    <div class="card">
+      <h2 id="formTitle">Thêm sản phẩm</h2>
+      <form id="pForm" class="form grid2">
+        <input id="fName" placeholder="Tên sản phẩm" required maxlength="100">
+        <select id="fType" required>
+          <option value="shirt">Áo thun</option><option value="hoodie">Hoodie</option><option value="mug">Cốc</option>
+          <option value="poster">Poster</option><option value="case">Ốp điện thoại</option><option value="tote">Túi tote</option>
+        </select>
+        <input id="fPrice" type="number" min="0" step="1000" placeholder="Giá bán (đ)" required>
+        <input id="fCost" type="number" min="0" step="1000" placeholder="Giá nhập từ nhà cung cấp (đ)" required>
+        <select id="fMarket"><option>Việt Nam</option><option>Mỹ</option><option>Châu Âu</option><option>Toàn cầu</option></select>
+        <input id="fSizes" placeholder="Kích cỡ, cách nhau dấu phẩy (S,M,L)">
+        <input id="fImage" type="url" placeholder="Link ảnh (https://...) — để trống dùng hình mẫu">
+        <input id="fSupplier" type="url" placeholder="Link nhà cung cấp (chỉ admin thấy)">
+        <textarea id="fDesc" placeholder="Mô tả ngắn" maxlength="500" class="full"></textarea>
+        <div class="full"><button class="button" type="submit" id="saveBtn">Lưu sản phẩm</button> <button class="button ghost" type="button" id="cancelEdit" hidden>Hủy sửa</button></div>
+      </form>
+      <p class="msg" id="formMsg"></p>
+    </div>
+
+    <div class="card">
+      <h2>Sản phẩm (<span id="pCount">0</span>)</h2>
+      <div class="scroll"><table id="pTable"><thead><tr><th>Sản phẩm</th><th>Thị trường</th><th>Giá bán</th><th>Giá nhập</th><th>Lợi nhuận</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>Đơn hàng (<span id="oCount">0</span>)</h2>
+      <div class="scroll"><table id="oTable"><thead><tr><th>Thời gian</th><th>Liên hệ</th><th>Sản phẩm</th><th>Tổng</th><th>Trạng thái</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

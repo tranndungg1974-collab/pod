@@ -1,0 +1,17 @@
+.hero.small{padding:35px 20px}.hero.small h1{font-size:30px}
+.narrow{max-width:420px;margin:auto}
+.form{display:flex;flex-direction:column;gap:12px}
+.form.grid2{display:grid;grid-template-columns:1fr 1fr}
+.full{grid-column:1/-1}
+.form input,.form select,.form textarea,td select{padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font-size:14px;width:100%}
+.form textarea{min-height:80px;resize:vertical}
+.button.ghost{background:#64748b}
+.bar{display:flex;gap:16px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+.bar span{margin-right:auto;font-weight:bold}.bar .button{margin-top:0}
+.msg{margin-top:10px;color:#dc2626;font-size:14px}.msg.ok{color:#16a34a}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+th{background:#2563eb;color:#fff}th,td{border:1px solid #ddd;padding:10px;text-align:left}
+td button{border:0;background:none;cursor:pointer;color:#2563eb;margin-right:8px}td button.del{color:#dc2626}
+.profit{color:#16a34a;font-weight:bold}
+@media(max-width:640px){.form.grid2{grid-template-columns:1fr}}
