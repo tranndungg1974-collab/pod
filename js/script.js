@@ -91,7 +91,16 @@ function renderProducts() {
     </button>
   `).join('');
 
-  $('empty').hidden = list.length > 0;
+  const emptyEl = $('empty');
+  if (PRODUCTS.length === 0) {
+    emptyEl.textContent = 'Chưa có sản phẩm. Vào trang Quản trị để thêm — dữ liệu sẽ đồng bộ ngay tại đây.';
+    emptyEl.hidden = false;
+  } else if (list.length === 0) {
+    emptyEl.textContent = 'Không tìm thấy sản phẩm phù hợp. Hãy thử từ khóa khác.';
+    emptyEl.hidden = false;
+  } else {
+    emptyEl.hidden = true;
+  }
   if ($('loading')) $('loading').hidden = true;
 }
 
@@ -225,10 +234,11 @@ $('checkout').addEventListener('click', async () => {
     cart = [];
     saveCart();
     $('drawer').hidden = true;
+    toast('Đã lưu đơn hàng vào Quản trị');
 
     // Chuyển hướng đến trang do admin thiết lập
     const url = redirectUrl || 'success.html';
-    window.location.href = url;
+    setTimeout(() => { window.location.href = url; }, 600);
   } catch (e) {
     console.error(e);
     toast('Không gửi được đơn, vui lòng thử lại.');
@@ -246,7 +256,7 @@ document.addEventListener('keydown', e => {
 function startData() {
   if (!uid) return;
 
-  // Load products real-time
+  // Load products real-time từ cùng path với admin → đồng bộ 2 chiều
   onValue(ref(db, `users/${uid}/products`), snap => {
     if (snap.exists()) {
       PRODUCTS = Object.entries(snap.val()).map(([id, p]) => ({
@@ -266,9 +276,13 @@ function startData() {
     dataReady = true;
     PRODUCTS = [];
     renderProducts();
+    if ($('loading')) {
+      $('loading').innerHTML = '<span style="color:#dc2626">Lỗi tải sản phẩm. Kiểm tra rules / đăng nhập Firebase.</span>';
+      $('loading').hidden = false;
+    }
   });
 
-  // Load settings (redirect URL sau checkout)
+  // Load settings (redirect URL sau checkout) do admin cấu hình
   onValue(ref(db, `users/${uid}/settings`), snap => {
     if (snap.exists() && snap.val().redirectUrl) {
       redirectUrl = snap.val().redirectUrl;
